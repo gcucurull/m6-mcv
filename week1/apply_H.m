@@ -6,6 +6,8 @@ function [ out_im ] = apply_H( im, T )
     from = im;
     to = out_im;
     
+    % based on http://dsp.stackexchange.com/questions/21703/how-to-apply-a-2d-2d-homography-matrix-to-an-image
+    % It is quite bad, should be improved
     for i=1:size(out_im,1)
         for j=1:size(out_im,2)
             v1 = [j;i;1];
