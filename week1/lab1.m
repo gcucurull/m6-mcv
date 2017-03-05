@@ -15,6 +15,7 @@
 I=imread('Data/0005_s.png'); % we have to be in the proper folder
 
 % ToDo: generate a matrix H which produces a similarity transformation
+H = eye(3); % this is just identity, not real matrix yet
 
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
