@@ -15,9 +15,14 @@
 I=imread('Data/0005_s.png'); % we have to be in the proper folder
 
 % ToDo: generate a matrix H which produces a similarity transformation
-H = eye(3); % this is just identity, not real matrix yet
+s = 0.5;
+theta = 45;
+t1 = 0;
+t2 = 0;
+H = [s*cosd(theta), -s*sind(theta), t1 ; s*sind(theta), s*cosd(theta), t2; 0, 0, 1];
 
 I2 = apply_H(I, H);
+size(I2);
 figure; imshow(I); figure; imshow(uint8(I2));
 
 
