@@ -195,6 +195,32 @@ plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
 
+% orig lines (l1,l2) (l3,l4)
+% normalize
+l1 = l1/l1(3);
+l2 = l2/l2(3);
+a = angle(l1(1:2), l2(1:2));
+disp( sprintf( 'Angle between l1 and l2:, %f degrees', a ) );
+
+% normalize
+l3 = l3/l3(3);
+l4 = l4/l4(3);
+a = angle(l3(1:2), l4(1:2));
+disp( sprintf( 'Angle between l3 and l4:, %f degrees', a ) );
+
+% transformed lines (lr1,lr2) (lr3,lr4)
+% normalize
+lr1 = lr1/lr1(3);
+lr2 = lr2/lr2(3);
+a = angle(lr1(1:2), lr2(1:2));
+disp( sprintf( 'Angle between transformed lr1 and lr2:, %f degrees', a ) );
+
+% normalize
+lr3 = lr3/lr3(3);
+lr4 = lr4/lr4(3);
+a = angle(lr3(1:2), lr4(1:2));
+disp( sprintf( 'Angle between transformed lr3 and lr4:, %f degrees', a ) );
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
