@@ -4,8 +4,8 @@ function [ out_im ] = apply_H( im, T)
 %%% 1. %%% compute output image size
     corners = [1,1,size(im,1),size(im,1);
                 1, size(im,2), 1, size(im,2);
-                1, 1, 1, 1]
-    t_corners = round(T*corners) 
+                1, 1, 1, 1];
+    t_corners = round(T*corners);
     
     % compute distances between transformer corner points
     i_dist = abs(min(t_corners(1,:))-max(t_corners(1,:))); % first row are i coordinates
