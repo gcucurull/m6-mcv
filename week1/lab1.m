@@ -147,7 +147,10 @@ p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
-
+l1 = cross(p1,p2);
+l2 = cross(p3,p4);
+l3 = cross(p5, p6);
+l4 = cross(p7, p8);
 
 % show the chosen lines in the image
 figure;imshow(I);
@@ -159,11 +162,30 @@ plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
 
 % ToDo: compute the homography that affinely rectifies the image
+a = cross(l1, l2);
+a = a/a(3,1); % point at infinity obtained from first pair of lines...
+b = cross(l3, l4);
+b = b/ b(3,1); % point at infinity obtained from second pair of lines...
+l = cross(a, b); % required imaged line at infinity...
+H = [1 0 0; 0 1 0; l(1, 1)/l(3,1) l(2, 1)/l(3,1) 1];
+
 
 I2 = apply_H(I, H);
 figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+p1trans=H*p1;
+p2trans=H*p2;
+p3trans=H*p3;
+p4trans=H*p4;
+p5trans=H*p5;
+p6trans=H*p6;
+p7trans=H*p7;
+p8trans=H*p8;
+lr1 = cross(p1trans,p2trans);
+lr2 = cross(p3trans,p4trans);
+lr3 = cross(p5trans, p6trans);
+lr4 = cross(p7trans, p8trans);
 
 % show the transformed lines in the transformed image
 figure;imshow(uint8(I2));
@@ -178,6 +200,7 @@ plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 % of lines before and after the image transformation
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric Rectification
 
