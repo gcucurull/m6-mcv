@@ -1,13 +1,8 @@
 function [ out_im ] = apply_H( im, T)
 % Receives an image 'im' and a matrix transofrmation 'T'
-    
-%%% 1. %%% compute output image size
-%     corners = [1,1,size(im,1),size(im,1);
-%                 1, size(im,2), 1, size(im,2);
-%                 1, 1, 1, 1];
             
-    corners = [1,   size(im,2),              1,             size(im,2);
-                1,  1,     size(im,1),                      size(im,1);
+    corners = [1,   size(im,2), 1, size(im,2);
+                1,  1,     size(im,1), size(im,1);
                 1, 1, 1, 1];
             
     t_corners = T*corners;
