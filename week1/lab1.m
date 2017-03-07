@@ -234,6 +234,78 @@ disp( sprintf( 'Angle between transformed lr3 and lr4:, %f degrees', a ) );
 %       Compute also the angles between the pair of lines before and after
 %       rectification.
 
+close all;
+
+% Orthogonal pair of lines 1
+l1 = lr1;
+m1 = lr3;
+
+% Orthogonal pair of lines 2
+l2 = lr2;
+m2 = lr4;
+
+figure;imshow(uint8(I2));
+hold on;
+t=1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(m1(1)*t + m1(3)) / m1(2), 'y');
+plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
+plot(t, -(m2(1)*t + m2(3)) / m2(2), 'y');
+
+% solve a system of equations to get s
+A = [l1(1)*m1(1), l1(1)*m1(2)+l1(2)*m1(1), l1(2)*m1(2);
+     l2(1)*m2(1), l2(1)*m2(2)+l2(2)*m2(1), l2(2)*m2(2)];
+ 
+s_vec = null(A);
+S = [s_vec(1), s_vec(2); s_vec(2), s_vec(3)];
+
+K = chol(S);
+H = eye(3);
+K = inv(K);
+H(1:2,1:2) = K;
+
+I3 = apply_H(I2, H);
+figure; imshow(uint8(I3));
+
+% visualize new lines
+l1trans = inv(H')*l1;
+l2trans = inv(H')*l2;
+m1trans = inv(H')*m1;
+m2trans = inv(H')*m2;
+
+hold on;
+t=1:0.1:1000;
+plot(t, -(l1trans(1)*t + l1trans(3)) / l1trans(2), 'y');
+plot(t, -(m1trans(1)*t + m1trans(3)) / m1trans(2), 'y');
+plot(t, -(l2trans(1)*t + l2trans(3)) / l2trans(2), 'y');
+plot(t, -(m2trans(1)*t + m2trans(3)) / m2trans(2), 'y');
+
+% original lines
+% normalize
+l1 = l1/l1(3);
+m1 = m1/m1(3);
+a = angle(l1(1:2), m1(1:2));
+disp( sprintf( 'Angle between metric rectified l1 and m1:, %f degrees', a ) );
+
+% normalize
+l2 = l2/l2(3);
+m2 = m2/m2(3);
+a = angle(l2(1:2), m2(1:2));
+disp( sprintf( 'Angle between metric rectified l2 and m2:, %f degrees', a ) );
+
+% transformed lines
+% normalize
+l1trans = l1trans/l1trans(3);
+m1trans = m1trans/m1trans(3);
+a = angle(l1trans(1:2), m1trans(1:2));
+disp( sprintf( 'Angle between metric rectified l1trans and m1trans:, %f degrees', a ) );
+
+% normalize
+l2trans = l2trans/l2trans(3);
+m2trans = m2trans/m2trans(3);
+a = angle(l2trans(1:2), m2trans(1:2));
+disp( sprintf( 'Angle between metric rectified l2trans and m2trans:, %f degrees', a ) );
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
