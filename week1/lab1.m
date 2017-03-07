@@ -93,7 +93,32 @@ target = [320,  150,    size(I,1),size(I,1);
           1,    1300,   1, size(I,2);
           1, 1, 1, 1];
       
-H = [1, 2, 1; 1, 0, 1; 0, 0 1];
+% compute homography matrix
+points = {};
+for i=1:4
+    points{i} = [-corners(1,i), -corners(2,i), -1, 0, 0, 0, corners(1,i)*target(1,i), corners(2,i)*target(1,i);
+         0,  0, 0, -corners(1,i), -corners(2,i), -1, corners(1,i)*target(2,i), corners(2,i)*target(2,i)];
+end
+
+A = [points{1}; points{2}; points{3}; points{4}];
+b = [target(1,1), target(2,1), target(1,2), target(2,2), target(1,3), target(2,3), target(1,4), target(2,4)]';
+
+h = A\b;
+
+H = [h(1), h(2), h(3);
+    h(4), h(5), h(6);
+    h(7), h(8), 1];
+
+% stop
+
+
+% p1 = [-corners(1,1), -corners(2,1), -1, 0, 0, 0, corners(1,1)*target(1,1), corners(2,1)*target(1,1), target(1,1);
+%          0,  0, 0, -corners(1,1), -corners(2,1), -1, corners(1,1)*target(2,1), corners(2,1)*target(2,1), target(2,1)];
+%       
+% H = [1, 2, 1; 1, 0, 1; 3, 2, 1];
+H=[ 0.9638 -0.0960 52.5754;
+0.2449 1.3808 -17.0081;
+-0.0001 0.0013 1.0000];
 det(H)
 
 I2 = apply_H(I, H);
