@@ -109,18 +109,6 @@ H = [h(1), h(2), h(3);
     h(4), h(5), h(6);
     h(7), h(8), 1];
 
-% stop
-
-
-% p1 = [-corners(1,1), -corners(2,1), -1, 0, 0, 0, corners(1,1)*target(1,1), corners(2,1)*target(1,1), target(1,1);
-%          0,  0, 0, -corners(1,1), -corners(2,1), -1, corners(1,1)*target(2,1), corners(2,1)*target(2,1), target(2,1)];
-%       
-% H = [1, 2, 1; 1, 0, 1; 3, 2, 1];
-% H=[ 0.9638 -0.0960 52.5754;
-% 0.2449 1.3808 -17.0081;
-% -0.0001 0.0013 1.0000];
-det(H)
-
 I2 = apply_H(I, H);
 figure; imshow(I); figure; imshow(uint8(I2));
 
@@ -175,13 +163,21 @@ figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 p1trans=H*p1;
+p1trans = p1trans / p1trans(3);
 p2trans=H*p2;
+p2trans = p2trans / p2trans(3);
 p3trans=H*p3;
+p3trans = p3trans / p3trans(3);
 p4trans=H*p4;
+p4trans = p4trans / p4trans(3);
 p5trans=H*p5;
+p5trans = p5trans / p5trans(3);
 p6trans=H*p6;
+p6trans = p6trans / p6trans(3);
 p7trans=H*p7;
+p7trans = p7trans / p7trans(3);
 p8trans=H*p8;
+p8trans = p8trans / p8trans(3);
 lr1 = cross(p1trans,p2trans);
 lr2 = cross(p3trans,p4trans);
 lr3 = cross(p5trans, p6trans);
