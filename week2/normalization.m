@@ -1,7 +1,8 @@
 function [ xnorm, T ] = normalization( x )
     x(1,1:4)=x(1,1:4)./x(3,1:4);
-    x(2,1:4)=x(1,1:4)./x(3,1:4);
+    x(2,1:4)=x(2,1:4)./x(3,1:4);
     x(3,1:4)=1;
+    
     centroid = mean(x(1:2,1:4)')';
     newx(1,1:4) =  x(1,1:4)-centroid(1);
     newx(2,1:4) = x(2,1:4)-centroid(2);

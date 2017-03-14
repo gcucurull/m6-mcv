@@ -9,12 +9,14 @@ while it < max_it
     
     points = randomsample(Npoints, 4);
     H = homography2d(x1(:,points), x2(:,points)); % ToDo: you have to create this function
+    
+    % v = homography_solve(x1(1:2,points), x2(1:2,points));
     inliers = compute_inliers(H, x1, x2, th);
     
     % test if it is the best model so far
     if length(inliers) > length(best_inliers)
         best_inliers = inliers;
-    end    
+    end
     
     % update estimate of max_it (the number of trials) to ensure we pick, 
     % with probability p, an initial data set with no outliers
@@ -42,8 +44,13 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
     
 
     % compute the symmetric geometric error
-    d2 = % ToDo
+    d2 = l2_dist(euclid(x1)-euclid(inv(H)*x2))+l2_dist(euclid(x2)-euclid(H*x1));
+    %d2 = norm((x2-H*x1))+norm((inv(H)*x2-x1));% ToDo
     idx_inliers = find(d2 < th.^2);
+
+
+function distance = l2_dist(vec)
+    distance = sqrt(sum(vec.^2));
 
 
 function xn = normalise(x)    
