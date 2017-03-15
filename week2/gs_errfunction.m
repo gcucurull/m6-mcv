@@ -31,5 +31,5 @@ function [ diff ] = gs_errfunction( P0, Xobs )
 end
 
 function distance = l2_dist(vec)
-    distance = sqrt(sum(vec.^2));
+    distance = (sum(vec.^2));
 end

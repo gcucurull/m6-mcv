@@ -8,17 +8,17 @@ addpath('sift');
 
 %% Open images
 
-imargb = imread('Data/llanes/llanes_a.jpg');
-imbrgb = imread('Data/llanes/llanes_b.jpg');
-imcrgb = imread('Data/llanes/llanes_c.jpg');
+% imargb = imread('Data/llanes/llanes_a.jpg');
+% imbrgb = imread('Data/llanes/llanes_b.jpg');
+% imcrgb = imread('Data/llanes/llanes_c.jpg');
 
 % imargb = imread('Data/castle_int/0016_s.png');
 % imbrgb = imread('Data/castle_int/0015_s.png');
 % imcrgb = imread('Data/castle_int/0014_s.png');
 
-% imargb = imread('Data/aerial/site13/frame00000.png');
-% imbrgb = imread('Data/aerial/site13/frame00002.png');
-% imcrgb = imread('Data/aerial/site13/frame00003.png');
+imargb = imread('Data/aerial/site13/frame00000.png');
+imbrgb = imread('Data/aerial/site13/frame00002.png');
+imcrgb = imread('Data/aerial/site13/frame00003.png');
 
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -111,8 +111,8 @@ title('Mosaic A-B-C');
 
 % Homography ab
 
-x = points_a(1:2, matches_ab(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_b(1:2, matches_ab(2,:)); %      point correspondences we will refine with the geometric method
+x = points_a(1:2, matches_ab(1,inliers_ab));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b(1:2, matches_ab(2,inliers_ab)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
 
@@ -132,7 +132,7 @@ err_final = sum( sum( f.^2 ));
 fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err_final);
 
 
-%% See differences in the keypoint locations
+% See differences in the keypoint locations
 
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
@@ -157,12 +157,12 @@ hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
 
-%%  Homography bc
+%  Homography bc
 
 % ToDo: refine the homography bc with the Gold Standard algorithm
 
-x = points_b(1:2, matches_bc(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_c(1:2, matches_bc(2,:)); %      point correspondences we will refine with the geometric method
+x = points_b(1:2, matches_bc(1,inliers_bc));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_c(1:2, matches_bc(2,inliers_bc)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hbc(:) ; x(:) ];      % The parameters or independent variables
 
@@ -182,7 +182,7 @@ err_final = sum( sum( f.^2 ));
 fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err_final);
 
 
-%% See differences in the keypoint locations
+% See differences in the keypoint locations
 
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
@@ -207,7 +207,7 @@ hold on;
 plot(xp(1,:), xp(2,:),'+y');
 plot(xhatp(1,:), xhatp(2,:),'+c');
 
-%% Build mosaic
+% Build mosaic
 corners = [-400 1200 -100 650];
 iwb = apply_H_v2(imbrgb, eye(3), corners); % ToDo: complete the call to the function
 iwa = apply_H_v2(imargb, Hab_r, corners); % ToDo: complete the call to the function
@@ -216,7 +216,7 @@ iwc = apply_H_v2(imcrgb, inv(Hbc_r), corners); % ToDo: complete the call to the 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 5. OPTIONAL: Calibration with a planar pattern
 % 
@@ -346,9 +346,9 @@ title('Mosaic A-B-C');
 %     vgg_scatter_plot(x, 'g');
 % end
 % 
-% % ToDo: change the virtual object, use another 3D simple geometric object like a pyramid
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ToDo: change the virtual object, use another 3D simple geometric object like a pyramid
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 6. OPTIONAL: Add a logo to an image using the DLT algorithm
 % imargb = imread('Data/logo_optional/cvc.png');
 % imbrgb = imread('Data/logo_optional/nvidia.jpg');
@@ -362,8 +362,8 @@ title('Mosaic A-B-C');
 %             1 1 size(imbrgb,1) size(imbrgb,1);
 %             1 1 1 1];
 %         
-% Hlogo = homography2d(cornersA, cornersB);
+% Hlogo = homography2d(cornersB, cornersA);
 % 
-% imbrgb = apply_H_v2(imbrgb, inv(Hlogo), [0 1260 0 704]);
+% imbrgb = apply_H_v2(imbrgb, (Hlogo), [0 1260 0 704]);
 % imshow(imbrgb);
 % figure, imshow(max(imbrgb,imargb))
