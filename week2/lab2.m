@@ -8,17 +8,17 @@ addpath('sift');
 
 %% Open images
 
-% imargb = imread('Data/llanes/llanes_a.jpg');
-% imbrgb = imread('Data/llanes/llanes_b.jpg');
-% imcrgb = imread('Data/llanes/llanes_c.jpg');
+imargb = imread('Data/llanes/llanes_a.jpg');
+imbrgb = imread('Data/llanes/llanes_b.jpg');
+imcrgb = imread('Data/llanes/llanes_c.jpg');
 
 % imargb = imread('Data/castle_int/0016_s.png');
 % imbrgb = imread('Data/castle_int/0015_s.png');
 % imcrgb = imread('Data/castle_int/0014_s.png');
 
-imargb = imread('Data/aerial/site13/frame00000.png');
-imbrgb = imread('Data/aerial/site13/frame00002.png');
-imcrgb = imread('Data/aerial/site13/frame00003.png');
+% imargb = imread('Data/aerial/site13/frame00000.png');
+% imbrgb = imread('Data/aerial/site13/frame00002.png');
+% imcrgb = imread('Data/aerial/site13/frame00003.png');
 
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -350,20 +350,20 @@ title('Mosaic A-B-C');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 6. OPTIONAL: Add a logo to an image using the DLT algorithm
-% imargb = imread('Data/logo_optional/cvc.png');
-% imbrgb = imread('Data/logo_optional/nvidia.jpg');
-% figure
-% imshow(imargb)
-% cornersA = [290 475 448 749;
-%             614 591 690 616;
-%             1 1 1 1];
-%   
-% cornersB = [1 size(imbrgb,2) 1 size(imbrgb,2);
-%             1 1 size(imbrgb,1) size(imbrgb,1);
-%             1 1 1 1];
-%         
-% Hlogo = homography2d(cornersB, cornersA);
-% 
-% imbrgb = apply_H_v2(imbrgb, (Hlogo), [0 1260 0 704]);
-% imshow(imbrgb);
-% figure, imshow(max(imbrgb,imargb))
+imargb = imread('Data/logo_optional/cvc.PNG');
+imbrgb = imread('Data/logo_optional/nvidia.jpg');
+figure
+imshow(imargb)
+cornersA = [290 475 448 749;
+            614 591 690 616;
+            1 1 1 1];
+  
+cornersB = [1 size(imbrgb,2) 1 size(imbrgb,2);
+            1 1 size(imbrgb,1) size(imbrgb,1);
+            1 1 1 1];
+        
+Hlogo = homography2d(cornersB, cornersA);
+
+imbrgb = apply_H_v2(imbrgb, (Hlogo), [0 1260 0 704]);
+imshow(imbrgb);
+figure, imshow(max(imbrgb,imargb))
