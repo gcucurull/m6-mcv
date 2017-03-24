@@ -2,7 +2,7 @@
 %% Lab 3: The geometry of two views 
 % (optional: photo-sequencing)
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute the fundamental matrix
@@ -22,13 +22,21 @@ x2_test = P2 * X;
 % ToDo: create the following function that estimates F using the normalised 8 point algorithm
 F_es = fundamental_matrix(x1_test, x2_test);
 
+
+%http://www.maths.lth.se/matematiklth/personal/calle/datorseende13/notes/forelas6.pdf
 % Real fundamental matrix
-F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+ Tx = [0 -t(3) t(2);
+       t(3) 0 -t(1);
+       -t(2) t(1) 0;
+      ];
+ F_gt =  Tx*R;% ToDo: write the expression of the real fundamental matrix for P1 and P2
 
-% Evaluation: these two matrices should be very similar
-F_gt / norm(F_gt)
-F_es / norm(F_es)
+% % Evaluation: these two matrices should be very similar
+ F_gt / norm(F_gt)
+ F_es / norm(F_es)
 
+ 
+ %A VEGADES DONEN ELS SIGNES +- IGUAL, I A VEGADES, NO :S
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
