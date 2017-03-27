@@ -7,7 +7,7 @@ function [F_es] = fundamental_matrix(x1_test, x2_test)
     x2 = x2Norm(1,:)';
     y2 = x2Norm(2,:)';
 
-    a = [x2.*x1 x2.*y1 x2 y2.*x1 y2.*y1 y2 x1 y1 ones(8,1)];
+    a = [x2.*x1 x2.*y1 x2 y2.*x1 y2.*y1 y2 x1 y1 ones(size(x1,1),1)];
 
     [u, d, v] = svd(a);
 
