@@ -37,7 +37,7 @@ end
 
 % error
 euclid(X_test) - euclid(X_trian)
-
+% 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Reconstruction from two views
@@ -93,18 +93,20 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = ...
-
-
+E = K'*F*K;
+[u d v] = svd(E);
+W=[0 -1 0; 1 0 0; 0 0 1];
+R1= u*W*v';
+R2=u*W'*v';
+t=u(:,3);
 % ToDo: write the camera projection matrix for the first camera
-P1 = ...
-
+P1 = eye(3,4);
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = ...
-Pc2{2} = ...
-Pc2{3} = ...
-Pc2{4} = ...
+Pc2{1} = [u*W*v' t];
+Pc2{2} = [u*W*v' -t];
+Pc2{3} = [u*W'*v' t];
+Pc2{4} = [u*W'*v' -t];
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -116,15 +118,19 @@ Pc2{4} = ...
 % plot the first camera and the four possible solutions for the second
 figure;
 plot_camera(P1,w,h);
-plot_camera(Pc2{1},w,h);
-plot_camera(Pc2{2},w,h);
-plot_camera(Pc2{3},w,h);
-plot_camera(Pc2{4},w,h);
 
+plot_camera(Pc2{1},w,h);
+
+plot_camera(Pc2{2},w,h);
+
+plot_camera(Pc2{3},w,h);
+
+plot_camera(Pc2{4},w,h);
+% 
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = ...
+P2 = Pc2{1}
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -147,82 +153,82 @@ for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(3,i), -Xe(2,i), 5^2, [r(i) g(i) b(i)]/255, 'filled');
 end;
 axis equal;
-
-
-%% Compute reprojection error.
-
-% ToDo: compute the reprojection errors
-%       plot the histogram of reprojection errors, and
-%       plot the mean reprojection error
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 3. Depth map computation with local methods (SSD)
-
-% Data images: 'scene1.row3.col3.ppm','scene1.row3.col4.ppm'
-% Disparity ground truth: 'truedisp.row3.col3.pgm'
-
-% Write a function called 'stereo_computation' that computes the disparity
-% between a pair of rectified images using a local method based on a matching cost 
-% between two local windows.
 % 
-% The input parameters are 5:
-% - left image
-% - right image
-% - minimum disparity
-% - maximum disparity
-% - window size (e.g. a value of 3 indicates a 3x3 window)
-% - matching cost (the user may able to choose between SSD and NCC costs)
-%
-% In this part we ask to implement only the SSD cost
-%
-% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
-% 30x30) and the matching cost. Comment the results.
-%
-% Note 1: Use grayscale images
-% Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 4. OPTIONAL: Depth map computation with local methods (NCC)
-
-% Complete the previous function by adding the implementation of the NCC
-% cost.
-%
-% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
-% 30x30) and the matching cost. Comment the results.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 5. Depth map computation with local methods
-
-% Data images: '0001_rectified_s.png','0002_rectified_s.png'
-
-% Test the functions implemented in the previous section with the facade
-% images. Try different matching costs and window sizes and comment the
-% results.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 6. OPTIONAL: Bilateral weights
-
-% Modify the 'stereo_computation' so that you use bilateral weights (or
-% adaptive support weights) in the matching cost of two windows.
-% Reference paper: Yoon and Kweon, "Adaptive Support-Weight Approach for Correspondence Search", IEEE PAMI 2006
-%
-% Comment the results and compare them to the previous results (no weights).
-%
-% Note: Use grayscale images (the paper uses color images)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 7. OPTIONAL:  Stereo computation with Belief Propagation
-
-% Use the UGM library used in module 2 and implement a  
-% stereo computation method that minimizes a simple stereo energy with 
-% belief propagation. 
-% For example, use an L2 pixel-based data term and 
-% the same regularization term you used in module 2. 
-% Or pick a stereo paper (based on belief propagation) from the literature 
-% and implement it. Pick a simple method or just simplify the method they propose.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 8. OPTIONAL:  Depth computation with Plane Sweeping
-
-% Implement the plane sweeping method explained in class.
+% 
+% %% Compute reprojection error.
+% 
+% % ToDo: compute the reprojection errors
+% %       plot the histogram of reprojection errors, and
+% %       plot the mean reprojection error
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 3. Depth map computation with local methods (SSD)
+% 
+% % Data images: 'scene1.row3.col3.ppm','scene1.row3.col4.ppm'
+% % Disparity ground truth: 'truedisp.row3.col3.pgm'
+% 
+% % Write a function called 'stereo_computation' that computes the disparity
+% % between a pair of rectified images using a local method based on a matching cost 
+% % between two local windows.
+% % 
+% % The input parameters are 5:
+% % - left image
+% % - right image
+% % - minimum disparity
+% % - maximum disparity
+% % - window size (e.g. a value of 3 indicates a 3x3 window)
+% % - matching cost (the user may able to choose between SSD and NCC costs)
+% %
+% % In this part we ask to implement only the SSD cost
+% %
+% % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% % 30x30) and the matching cost. Comment the results.
+% %
+% % Note 1: Use grayscale images
+% % Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
+% 
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 4. OPTIONAL: Depth map computation with local methods (NCC)
+% 
+% % Complete the previous function by adding the implementation of the NCC
+% % cost.
+% %
+% % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% % 30x30) and the matching cost. Comment the results.
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 5. Depth map computation with local methods
+% 
+% % Data images: '0001_rectified_s.png','0002_rectified_s.png'
+% 
+% % Test the functions implemented in the previous section with the facade
+% % images. Try different matching costs and window sizes and comment the
+% % results.
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 6. OPTIONAL: Bilateral weights
+% 
+% % Modify the 'stereo_computation' so that you use bilateral weights (or
+% % adaptive support weights) in the matching cost of two windows.
+% % Reference paper: Yoon and Kweon, "Adaptive Support-Weight Approach for Correspondence Search", IEEE PAMI 2006
+% %
+% % Comment the results and compare them to the previous results (no weights).
+% %
+% % Note: Use grayscale images (the paper uses color images)
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 7. OPTIONAL:  Stereo computation with Belief Propagation
+% 
+% % Use the UGM library used in module 2 and implement a  
+% % stereo computation method that minimizes a simple stereo energy with 
+% % belief propagation. 
+% % For example, use an L2 pixel-based data term and 
+% % the same regularization term you used in module 2. 
+% % Or pick a stereo paper (based on belief propagation) from the literature 
+% % and implement it. Pick a simple method or just simplify the method they propose.
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% 8. OPTIONAL:  Depth computation with Plane Sweeping
+% 
+% % Implement the plane sweeping method explained in class.
