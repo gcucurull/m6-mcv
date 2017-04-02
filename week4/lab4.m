@@ -189,12 +189,23 @@ end;
 axis equal;
 % 
 % 
-% %% Compute reprojection error.
+%% Compute reprojection error.
 % 
 % % ToDo: compute the reprojection errors
 % %       plot the histogram of reprojection errors, and
 % %       plot the mean reprojection error
 % 
+
+% reprojection error:
+%   - project triangulated points onto each camera plane and compute
+%   difference w.r.t original points
+projx1 = euclid(P1*X);
+projx2 = euclid(P2*X);
+
+total_error_1 = sum(sum((x1-projx1).^2))
+total_error_2 = sum(sum((x2-projx2).^2))
+n_points = size(x1,2)
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 3. Depth map computation with local methods (SSD)
 % 
