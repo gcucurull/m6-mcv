@@ -93,20 +93,39 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = K'*F*K;
+E = K'*F*K; % eq 9.12 from https://www.robots.ox.ac.uk/~vgg/hzbook/hzbook2/HZepipolar.pdf
+
 [u d v] = svd(E);
-W=[0 -1 0; 1 0 0; 0 0 1];
+
+% the diagonal d must be (1,1,0)
+% because that's not the case, divide d by max(d) (to make it (1,1,0))
+% and multiply u by max(d) to keep everything scaled
+max_D = max(d(:));
+u = u*max_D;
+
+W= [0 -1 0; 
+    1 0 0; 
+    0 0 1];
+
+% two possible R
 R1= u*W*v';
-R2=u*W'*v';
+if det(R1) < 0
+    R1 = -R1;
+end
+R2= u*W'*v';
+if det(R2) < 0
+    R2 = -R2;
+end
+
 t=u(:,3);
 % ToDo: write the camera projection matrix for the first camera
 P1 = eye(3,4);
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = [u*W*v' t];
-Pc2{2} = [u*W*v' -t];
-Pc2{3} = [u*W'*v' t];
-Pc2{4} = [u*W'*v' -t];
+Pc2{1} = [R1 t];
+Pc2{2} = [R1 -t];
+Pc2{3} = [R2 t];
+Pc2{4} = [R2 -t];
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -130,7 +149,22 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = Pc2{1}
+% How to find the second camera:
+%   - select a matching point
+%   - triangulate it
+%   - project it onto the 2 cameras
+%   - the correct camera matrix has positive value in the 3rd dimension
+correct = -1;
+for i=1:4
+    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
+    proj1 = P1*trian;
+    proj2 = P2*trian;
+    if (proj1(3) > 0) && (proj2(3) > 0)
+        correct = i;
+    end
+end
+
+P2 = Pc2{correct};
 
 % Triangulate all matches.
 N = size(x1,2);

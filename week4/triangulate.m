@@ -18,8 +18,8 @@ function [ X ] = triangulate( x1, x2, P1, P2, imsize )
         0, 0, 1;];
     
     % Transform x, x', P and P' by H
-    x1 = H*x1;
-    x2 = H*x2;
+    x1 = euclid(H*x1);
+    x2 = euclid(H*x2);
     P1 = H*P1;
     P2 = H*P2;
     
@@ -45,5 +45,6 @@ function [ X ] = triangulate( x1, x2, P1, P2, imsize )
     [u d v] = svd(A);
     
     X= v(:,size(v,1));
+    X = X ./X(end); % Set 4th coordinate to 1
 end
 
