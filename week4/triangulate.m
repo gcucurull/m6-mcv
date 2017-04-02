@@ -1,8 +1,27 @@
 function [ X ] = triangulate( x1, x2, P1, P2, imsize )
 %TRIANGULATE Summary of this function goes here
-%   Detailed explanation goes here
+%   The entries are (x1, x2, P1, P2, imsize), where:
+%           - x1, and x2 are the Euclidean coordinates of two matching 
+%             points in two different images.
+%           - P1 and P2 are the two camera matrices
+%           - imsize is a two-dimensional vector with the image size
+
     x1=homog(x1);
     x2=homog(x2);
+    
+    % build matrix H (slide 8 lecture 7)
+    nx = imsize(1);
+    ny = imsize(2);
+    
+    H = [2/nx, 0, -1;
+        0, 2/ny, -1;
+        0, 0, 1;];
+    
+    % Transform x, x', P and P' by H
+    x1 = H*x1;
+    x2 = H*x2;
+    P1 = H*P1;
+    P2 = H*P2;
     
     x1p1_3t= x1(1)*P1(3,:);
     p1_1t= P1(1,:);
@@ -23,12 +42,8 @@ function [ X ] = triangulate( x1, x2, P1, P2, imsize )
         y2p2_3t-p2_2t ];
     
     
-    
     [u d v] = svd(A);
     
     X= v(:,size(v,1));
-    
-    
-    
 end
 
