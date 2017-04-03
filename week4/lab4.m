@@ -113,13 +113,13 @@ end
 
 t=u(:,3);
 % ToDo: write the camera projection matrix for the first camera
-P1 = scale*K*eye(3,4);
+P1 = K*eye(3,4);
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = scale*K*[R1 t];
-Pc2{2} = scale*K*[R1 -t];
-Pc2{3} = scale*K*[R2 t];
-Pc2{4} = scale*K*[R2 -t];
+Pc2{1} = K*[R1 t];
+Pc2{2} = K*[R1 -t];
+Pc2{3} = K*[R2 t];
+Pc2{4} = K*[R2 -t];
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -149,22 +149,22 @@ plot_camera(Pc2{4},w,h);
 %   - project it onto the 2 cameras
 %   - the correct camera matrix has positive value in the 3rd dimension
 
-% correct = -1;
-% for i=1:4
-%     trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
-%     proj1 = P1*trian
-%     proj2 = P2*trian
-%     if (proj1(3) >= 0) && (proj2(3) >= 0)
-%         correct = i;
-%         break
-%     end
-% end
-% 
-% correct
-% 
-% stop
+correct = -1;
+for i=1:4
+    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h])
+    proj1 = P1*trian
+    proj2 = P2*trian
+    if (proj1(3) >= 0) && (proj2(3) >= 0)
+        correct = i;
+        break
+    end
+end
 
-P2 = Pc2{1};
+correct
+
+%%
+
+P2 = Pc2{correct};
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -204,13 +204,16 @@ projx2 = euclid(P2*X);
 
 % Compute the euclidean distance between each point and then add all the
 % distances
-total_error_1 = sum(sqrt(sum((x1-projx1).^2, 1)))
-total_error_2 = sum(sqrt(sum((x2-projx2).^2, 1)))
+proj1_errors = sqrt(sum((x1-projx1).^2, 1));
+proj2_errors = sqrt(sum((x2-projx2).^2, 1));
+histogram([proj1_errors proj2_errors]);
+total_error_1 = sum(proj1_errors)
+total_error_2 = sum(proj2_errors)
 
 total_error = total_error_1+total_error_2;
 n_points = size(x1,2);
 
-(total_error/n_points)/2
+(total_error/(n_points*2))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
@@ -243,20 +246,31 @@ right_im = rgb2gray(imread('Data/scene1.row3.col4.ppm'));
 gt = imread('Data/truedisp.row3.col3.pgm');
 min_disp = 0;
 max_disp = 16;
-ws = 3;
+ws = 20;
 cost = 'SSD';
 disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
 imshow(uint8(disparity)*16);
 
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 4. OPTIONAL: Depth map computation with local methods (NCC)
-% 
-% % Complete the previous function by adding the implementation of the NCC
-% % cost.
-% %
-% % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
-% % 30x30) and the matching cost. Comment the results.
+%% 4. OPTIONAL: Depth map computation with local methods (NCC)
+
+% Complete the previous function by adding the implementation of the NCC
+% cost.
+%
+% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% 30x30) and the matching cost. Comment the results.
+
+left_im = rgb2gray(imread('Data/scene1.row3.col3.ppm'));
+right_im = rgb2gray(imread('Data/scene1.row3.col4.ppm'));
+gt = imread('Data/truedisp.row3.col3.pgm');
+min_disp = 0;
+max_disp = 16;
+ws = 9;
+cost = 'NCC';
+disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
+imshow(uint8(disparity)*16);
+
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 5. Depth map computation with local methods
