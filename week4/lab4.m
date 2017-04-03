@@ -97,12 +97,6 @@ E = K'*F*K; % eq 9.12 from https://www.robots.ox.ac.uk/~vgg/hzbook/hzbook2/HZepi
 
 [u d v] = svd(E);
 
-% the diagonal d must be (1,1,0)
-% because that's not the case, divide d by max(d) (to make it (1,1,0))
-% and multiply u by max(d) to keep everything scaled
-max_D = max(d(:));
-u = u*max_D;
-
 W= [0 -1 0; 
     1 0 0; 
     0 0 1];
@@ -156,13 +150,15 @@ plot_camera(Pc2{4},w,h);
 %   - the correct camera matrix has positive value in the 3rd dimension
 correct = -1;
 for i=1:4
-    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
-    proj1 = P1*trian;
-    proj2 = P2*trian;
-    if (proj1(3) > 0) && (proj2(3) > 0)
+    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h])
+    proj1 = P1*trian
+    proj2 = P2*trian
+    if (proj1(3) >= 0) && (proj2(3) >= 0)
         correct = i;
     end
 end
+
+correct
 
 P2 = Pc2{correct};
 
@@ -202,9 +198,15 @@ axis equal;
 projx1 = euclid(P1*X);
 projx2 = euclid(P2*X);
 
-total_error_1 = sum(sum((x1-projx1).^2))
-total_error_2 = sum(sum((x2-projx2).^2))
-n_points = size(x1,2)
+% Compute the euclidean distance between each point and then add all the
+% distances
+total_error_1 = sum(sqrt(sum((x1-projx1).^2, 1)))
+total_error_2 = sum(sqrt(sum((x2-projx2).^2, 1)))
+
+total_error = total_error_1+total_error_2;
+n_points = size(x1,2);
+
+(total_error/n_points)/2
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 3. Depth map computation with local methods (SSD)
