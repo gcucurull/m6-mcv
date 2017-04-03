@@ -45,6 +45,6 @@ function [ X ] = triangulate( x1, x2, P1, P2, imsize )
     [u d v] = svd(A);
     
     X= v(:,size(v,1));
-    X = X ./X(end); % Set 4th coordinate to 1
+    %X = X ./X(end); % Set 4th coordinate to 1
 end
 

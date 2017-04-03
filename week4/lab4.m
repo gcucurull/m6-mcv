@@ -113,13 +113,13 @@ end
 
 t=u(:,3);
 % ToDo: write the camera projection matrix for the first camera
-P1 = eye(3,4);
+P1 = scale*K*eye(3,4);
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = [R1 t];
-Pc2{2} = [R1 -t];
-Pc2{3} = [R2 t];
-Pc2{4} = [R2 -t];
+Pc2{1} = scale*K*[R1 t];
+Pc2{2} = scale*K*[R1 -t];
+Pc2{3} = scale*K*[R2 t];
+Pc2{4} = scale*K*[R2 -t];
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -148,19 +148,23 @@ plot_camera(Pc2{4},w,h);
 %   - triangulate it
 %   - project it onto the 2 cameras
 %   - the correct camera matrix has positive value in the 3rd dimension
-correct = -1;
-for i=1:4
-    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h])
-    proj1 = P1*trian
-    proj2 = P2*trian
-    if (proj1(3) >= 0) && (proj2(3) >= 0)
-        correct = i;
-    end
-end
 
-correct
+% correct = -1;
+% for i=1:4
+%     trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h]);
+%     proj1 = P1*trian
+%     proj2 = P2*trian
+%     if (proj1(3) >= 0) && (proj2(3) >= 0)
+%         correct = i;
+%         break
+%     end
+% end
+% 
+% correct
+% 
+% stop
 
-P2 = Pc2{correct};
+P2 = Pc2{1};
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -208,32 +212,42 @@ n_points = size(x1,2);
 
 (total_error/n_points)/2
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 3. Depth map computation with local methods (SSD)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 3. Depth map computation with local methods (SSD)
+
+% Data images: 'scene1.row3.col3.ppm','scene1.row3.col4.ppm'
+% Disparity ground truth: 'truedisp.row3.col3.pgm'
+
+% Write a function called 'stereo_computation' that computes the disparity
+% between a pair of rectified images using a local method based on a matching cost 
+% between two local windows.
 % 
-% % Data images: 'scene1.row3.col3.ppm','scene1.row3.col4.ppm'
-% % Disparity ground truth: 'truedisp.row3.col3.pgm'
-% 
-% % Write a function called 'stereo_computation' that computes the disparity
-% % between a pair of rectified images using a local method based on a matching cost 
-% % between two local windows.
-% % 
-% % The input parameters are 5:
-% % - left image
-% % - right image
-% % - minimum disparity
-% % - maximum disparity
-% % - window size (e.g. a value of 3 indicates a 3x3 window)
-% % - matching cost (the user may able to choose between SSD and NCC costs)
-% %
-% % In this part we ask to implement only the SSD cost
-% %
-% % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
-% % 30x30) and the matching cost. Comment the results.
-% %
-% % Note 1: Use grayscale images
-% % Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
-% 
+% The input parameters are 5:
+% - left image
+% - right image
+% - minimum disparity
+% - maximum disparity
+% - window size (e.g. a value of 3 indicates a 3x3 window)
+% - matching cost (the user may able to choose between SSD and NCC costs)
+%
+% In this part we ask to implement only the SSD cost
+%
+% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% 30x30) and the matching cost. Comment the results.
+%
+% Note 1: Use grayscale images
+% Note 2: Use 0 as minimum disparity and 16 as the the maximum one.
+
+left_im = rgb2gray(imread('Data/scene1.row3.col3.ppm'));
+right_im = rgb2gray(imread('Data/scene1.row3.col4.ppm'));
+gt = imread('Data/truedisp.row3.col3.pgm');
+min_disp = 0;
+max_disp = 16;
+ws = 3;
+cost = 'SSD';
+disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
+imshow(uint8(disparity)*16);
+
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 4. OPTIONAL: Depth map computation with local methods (NCC)
