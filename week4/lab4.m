@@ -151,12 +151,12 @@ plot_camera(Pc2{4},w,h);
 
 correct = -1;
 for i=1:4
-    trian = triangulate(x1(:,1), x2(:,1), P1, Pc2{i}, [w h])
+    P2 = Pc2{i};
+    trian = triangulate(x1(:,1), x2(:,1), P1, P2, [w h])
     proj1 = P1*trian
     proj2 = P2*trian
     if (proj1(3) >= 0) && (proj2(3) >= 0)
         correct = i;
-        break
     end
 end
 
@@ -207,13 +207,16 @@ projx2 = euclid(P2*X);
 proj1_errors = sqrt(sum((x1-projx1).^2, 1));
 proj2_errors = sqrt(sum((x2-projx2).^2, 1));
 histogram([proj1_errors proj2_errors]);
+hold on
 total_error_1 = sum(proj1_errors)
 total_error_2 = sum(proj2_errors)
 
 total_error = total_error_1+total_error_2;
 n_points = size(x1,2);
 
-(total_error/(n_points*2))
+mean = (total_error/(n_points*2))
+
+line([mean mean], ylim, 'Color','r');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
@@ -246,7 +249,7 @@ right_im = rgb2gray(imread('Data/scene1.row3.col4.ppm'));
 gt = imread('Data/truedisp.row3.col3.pgm');
 min_disp = 0;
 max_disp = 16;
-ws = 20;
+ws = 30;
 cost = 'SSD';
 disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
 imshow(uint8(disparity)*16);
@@ -266,20 +269,30 @@ right_im = rgb2gray(imread('Data/scene1.row3.col4.ppm'));
 gt = imread('Data/truedisp.row3.col3.pgm');
 min_disp = 0;
 max_disp = 16;
-ws = 9;
+ws = 3;
 cost = 'NCC';
 disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
 imshow(uint8(disparity)*16);
 
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% 5. Depth map computation with local methods
-% 
-% % Data images: '0001_rectified_s.png','0002_rectified_s.png'
-% 
-% % Test the functions implemented in the previous section with the facade
-% % images. Try different matching costs and window sizes and comment the
-% % results.
+%% 5. Depth map computation with local methods
+
+% Data images: '0001_rectified_s.png','0002_rectified_s.png'
+
+% Test the functions implemented in the previous section with the facade
+% images. Try different matching costs and window sizes and comment the
+% results.
+
+left_im = rgb2gray(imread('Data/0001_rectified_s.png'));
+right_im = rgb2gray(imread('Data/0002_rectified_s.png'));
+min_disp = 0;
+max_disp = 16;
+ws = 3;
+cost = 'NCC';
+disparity = stereo_computation(left_im, right_im, min_disp, max_disp, ws, cost);
+imshow(uint8(disparity)*16);
+
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% 6. OPTIONAL: Bilateral weights
