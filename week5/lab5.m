@@ -2,7 +2,7 @@
 %% Lab 5: Reconstruction from uncalibrated viewas
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,7 +170,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % in the previous iteration.
 
 %% Check projected points (estimated and data points)
-
+[Pproj, Xproj] = factorization_method(x1,x2);
 for i=1:2
     x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
 end
