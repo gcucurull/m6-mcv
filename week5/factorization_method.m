@@ -1,9 +1,33 @@
-function [Pproj, Xproj] = factorization_method(x1,x2)
+function [Pproj, Xproj] = factorization_method(x1,x2, init)
+%       - 'init' can be either "ones" or "sturm"
 
     [norm_x1, T1] = normalise2dpts(x1);
     [norm_x2, T2] = normalise2dpts(x2);
     
     lambda = ones (2, size(x1,2));
+    
+    if isequal(init, 'sturm')
+        % camera 1
+        F1 = fundamental_matrix(x1, x1);
+        [U, D, V] = svd(F1);
+        e1 = V(:,3) / V(3,3);
+            
+        % camera 2
+        F2 = fundamental_matrix(x2, x1);
+        [U, D, V] = svd(F2);
+        e2 = V(:,3) / V(3,3);
+            
+        for j = 1:size(x1,2)
+            num = x1(:, j)'*F1*cross(e1, x1(:,j));
+            denom = norm(cross(e1, x1(:,j))).^2*lambda(1, j);
+            lambda(1,j) = num/denom;
+        end
+        for j = 1:size(x2,2)
+            num = x1(:, j)'*F2*cross(e2, x2(:,j));
+            denom = norm(cross(e2, x2(:,j))).^2*lambda(1, j);
+            lambda(2,j) = num/denom;
+        end
+    end
     
     d= Inf;
     flag = true;
@@ -17,8 +41,6 @@ function [Pproj, Xproj] = factorization_method(x1,x2)
                 lambda(:,j) = lambda(:,j) / norm(lambda(:,j));
             end
         end
-        
-        
         
         M = zeros(3*2, size(x1,2));
         M(1,:) = lambda(1,:) .* norm_x1(1,:);
@@ -34,6 +56,7 @@ function [Pproj, Xproj] = factorization_method(x1,x2)
         Xproj = V(:,1:4)';
         
         d_old= d;
+        d = 0;
        
         for i=1:2
             if i==1
@@ -44,12 +67,18 @@ function [Pproj, Xproj] = factorization_method(x1,x2)
                  x = norm_x2;
             end
             for j=1:size(x1,2)
-                 d = d + norm(x(:,j) - Px(:,j))^2; 
+                 %d = d + sqrt(sum((x(:,j) - Px(:,j)).^2));
+                 d = d + sum((x(:,j) - Px(:,j)).^2);
             end
         end
-        d = d / (2 * size(x1,2));
-        if ~((abs(d - d_old)/d) < 0.1)
+        
+        if ((abs(d - d_old)/d) < 0.1)
             flag = false;
+        else
+            % If it has not converged update lambdas
+            temp = Pm*Xproj;
+            lambda(1,:) = temp(3,:);
+            lambda(2,:) = temp(6,:);
         end
     end
     

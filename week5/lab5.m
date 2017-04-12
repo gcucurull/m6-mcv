@@ -170,7 +170,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % in the previous iteration.
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method(x1,x2);
+[Pproj, Xproj] = factorization_method(x1,x2, 'sturm');
 for i=1:2
     x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
 end
@@ -255,9 +255,31 @@ v1p = vanishing_point(x2(:,21),x2(:,22),x2(:,23),x2(:,24));
 v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
 v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
+% add small epsilon to avoid division by zero
+v3(3) = 0.000001;
+
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
 
+
+% from lecture 9 slide 20, whe want to compute H_{a<-p}
+% we first create the matrix A, which is 3x4 (slide 22)
+% to do so, we have to get the vanishing points v and v' in P3 space,
+% thus we triangulate them
+
+
+
+A = [triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [w h])'];
+
+p = null(A);
+
+% normalize p because it is up to scale and we want p(4) to be 1
+p = p / p(end);
+
+Hp = eye(4,4);
+Hp(end,:) = p';
 
 %% check results
 
@@ -311,6 +333,15 @@ axis equal
 v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
+
+% We need to compute matrix A from slide 29 (lecture 9)
+omega = inv(K)'*inv(K);
+M = Pproj(1:3,1:3);
+AAt = inv(M'*omega*M);
+A = chol(AAt);
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
 
 %% check results
 
