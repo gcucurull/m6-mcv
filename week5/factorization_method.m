@@ -33,13 +33,33 @@ function [Pproj, Xproj] = factorization_method(x1,x2, init)
     flag = true;
     while flag
         
-        for i=1:2
-            for j = 1:2
-                lambda(j,:) = lambda(j,:) / norm(lambda(j,:));
+        rescale = true;
+        counter = 0;
+        lambda_diff = Inf;
+        while rescale
+            old_lambda_diff = lambda_diff;
+            old_lambda = lambda;
+            if mod(counter, 2)
+                % normalize rows
+                lambda(1,:) = lambda(1,:) ./ norm(lambda(1,:));
+                lambda(2,:) = lambda(2,:) ./ norm(lambda(2,:));
+            else
+                % normalize columns
+                for col = 1:size(x1,2)
+                    lambda(:,col) = lambda(:,col) / norm(lambda(:,col));
+                end
             end
-            for j = 1:size(x1,2)
-                lambda(:,j) = lambda(:,j) / norm(lambda(:,j));
+            
+            % compute euclidan difference with old lambda
+            lambda_diff = (old_lambda - lambda).^2;
+            lambda_diff = sum(lambda_diff(:));
+            lambda_diff = sqrt(lambda_diff);
+                        
+            if ((abs(lambda_diff - old_lambda_diff)/lambda_diff) < 0.1)
+                rescale = false;
             end
+            counter = counter +1;
+            
         end
         
         M = zeros(3*2, size(x1,2));
@@ -71,6 +91,8 @@ function [Pproj, Xproj] = factorization_method(x1,x2, init)
                  d = d + sum((x(:,j) - Px(:,j)).^2);
             end
         end
+        
+        d
         
         if ((abs(d - d_old)/d) < 0.1)
             flag = false;
