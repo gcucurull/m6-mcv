@@ -347,8 +347,10 @@ A_omega =          [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2
                     1           0                         0                         -1          0                         0];
 
 
-omega_v = null(A_omega);
-omega_v = omega_v(:,2);
+[~,~, V] = svd(A_omega);
+omega_v = V(:,end);
+%omega_v = null(A_omega);
+%omega_v = omega_v(:,2);
 
 omega = [omega_v(1) omega_v(2) omega_v(3);
          omega_v(2) omega_v(4) omega_v(5);
@@ -359,7 +361,7 @@ P = Pproj(1:3, :)*inv(Hp);
 M = P(:,1:3);
 %M = Pproj(1:3,1:3);
 
-AAt = pinv(M'*omega*M);
+AAt = inv(M'*omega*M);
 
 A = chol(AAt);
 
@@ -541,11 +543,31 @@ axis equal;
 
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
+v1 = homog(VPs(:,1));
+v2 = homog(VPs(:,2));
+v3 = homog(VPs(:,3));
 
+A_omega =   [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1) v1(2)*v2(2) v1(2)*v2(3) + v1(3)*v2(2) v1(3)*v2(3);
+            v1(1)*v3(1) v1(1)*v3(2) + v1(2)*v3(1) v1(1)*v3(3) + v1(3)*v3(1) v1(2)*v3(2) v1(2)*v3(3) + v1(3)*v3(2) v1(3)*v3(3);
+            v2(1)*v3(1) v2(1)*v3(2) + v2(2)*v3(1) v2(1)*v3(3) + v2(3)*v3(1) v2(2)*v3(2) v2(2)*v3(3) + v2(3)*v3(2) v2(3)*v3(3);
+            0           1                         0                         0           0                         0;
+            1           0                         0                         -1          0                         0];
+
+
+[~,~, V] = svd(A_omega);
+omega_v = V(:,end);
+
+omega = [omega_v(1) omega_v(2) omega_v(3);
+         omega_v(2) omega_v(4) omega_v(5);
+         omega_v(3) omega_v(5) omega_v(6)];
+     
 % We need to compute matrix A from slide 29 (lecture 9)
-omega = inv(K)'*inv(K);
-M = Pproj(1:3,1:3);
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:,1:3);
+%M = Pproj(1:3,1:3);
+
 AAt = inv(M'*omega*M);
+
 A = chol(AAt);
 
 Ha = eye(4,4);
