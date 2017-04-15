@@ -3,6 +3,9 @@
 
 
 addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('vanishing_points_v0.4/')
+addpath('vanishing_points_v0.4/lib')
+addpath('vanishing_points_v0.4/mex_files')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -478,6 +481,19 @@ focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
 [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
+A = [triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [w h])'];
+
+p = null(A);
+
+% normalize p because it is up to scale and we want p(4) to be 1
+p = p / p(end);
+
+Hp = eye(4,4);
+Hp(end,:) = p';
+
 
 
 %% Visualize the result
