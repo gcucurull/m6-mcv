@@ -276,14 +276,15 @@ A = [triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
     triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
     triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [w h])'];
 
-p = null(A);
+[~,~,V] = svd(A);
+p = V(:,end);
+%p = null(A);
 
 % normalize p because it is up to scale and we want p(4) to be 1
 p = p / p(end);
 
 Hp = eye(4,4);
 Hp(end,:) = p';
-
 %% check results
 
 Xa = euclid(Hp*Xproj);
@@ -339,25 +340,27 @@ v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
 % We need to create matrix A_omega in order to get matrix omega
 % slide 35
-A_omega =          [v1(1)*v2(1), v1(1)*v2(2) + v1(2)*v2(1), v1(1)*v2(3) + v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3) + v1(3)*v2(2), v1(3)*v2(3);
-                    v1(1)*v3(1), v1(1)*v3(2) + v1(2)*v3(1), v1(1)*v3(3) + v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3) + v1(3)*v3(2), v1(3)*v3(3);
-                    v2(1)*v3(1), v2(1)*v3(2) + v2(2)*v3(1), v2(1)*v3(3) + v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3) + v2(3)*v3(2), v2(3)*v3(3);
-                    0,           1,                         0,                         0,           0,                         0;
-                    1,           0,                         0,                         -1,          0,                         0];
+A_omega =          [v1(1)*v2(1) v1(1)*v2(2) + v1(2)*v2(1) v1(1)*v2(3) + v1(3)*v2(1) v1(2)*v2(2) v1(2)*v2(3) + v1(3)*v2(2) v1(3)*v2(3);
+                    v1(1)*v3(1) v1(1)*v3(2) + v1(2)*v3(1) v1(1)*v3(3) + v1(3)*v3(1) v1(2)*v3(2) v1(2)*v3(3) + v1(3)*v3(2) v1(3)*v3(3);
+                    v2(1)*v3(1) v2(1)*v3(2) + v2(2)*v3(1) v2(1)*v3(3) + v2(3)*v3(1) v2(2)*v3(2) v2(2)*v3(3) + v2(3)*v3(2) v2(3)*v3(3);
+                    0           1                         0                         0           0                         0;
+                    1           0                         0                         -1          0                         0];
+
 
 omega_v = null(A_omega);
 omega_v = omega_v(:,2);
+
 omega = [omega_v(1) omega_v(2) omega_v(3);
          omega_v(2) omega_v(4) omega_v(5);
          omega_v(3) omega_v(5) omega_v(6)];
      
 % We need to compute matrix A from slide 29 (lecture 9)
-
 P = Pproj(1:3, :)*inv(Hp);
 M = P(:,1:3);
 %M = Pproj(1:3,1:3);
 
 AAt = pinv(M'*omega*M);
+
 A = chol(AAt);
 
 Ha = eye(4,4);
