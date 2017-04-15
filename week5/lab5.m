@@ -337,10 +337,22 @@ v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
+% We need to create matrix A_omega in order to get matrix omega
+% slide 35
+A_omega =          [v1(1)*v2(1), v1(1)*v2(2) + v1(2)*v2(1), v1(1)*v2(3) + v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3) + v1(3)*v2(2), v1(3)*v2(3);
+                    v1(1)*v3(1), v1(1)*v3(2) + v1(2)*v3(1), v1(1)*v3(3) + v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3) + v1(3)*v3(2), v1(3)*v3(3);
+                    v2(1)*v3(1), v2(1)*v3(2) + v2(2)*v3(1), v2(1)*v3(3) + v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3) + v2(3)*v3(2), v2(3)*v3(3);
+                    0,           1,                         0,                         0,           0,                         0;
+                    1,           0,                         0,                         -1,          0,                         0];
+
+omega_v = null(A_omega);
+omega = [omega_v(1) omega_v(2) omega_v(3);
+         omega_v(2) omega_v(4) omega_v(5);
+         omega_v(3) omega_v(5) omega_v(6)];
+     
 % We need to compute matrix A from slide 29 (lecture 9)
-omega = inv(K)'*inv(K);
 M = Pproj(1:3,1:3);
-AAt = inv(M'*omega*M);
+AAt = pinv(M'*omega*M);
 A = chol(AAt);
 
 Ha = eye(4,4);
@@ -415,30 +427,30 @@ figure();
 plotmatches(I{1}, I{2}, points{1}, points{2}, matches, 'Stacking', 'v');
 
 % Fit Fundamental matrix and remove outliers.
-x1 = points{1}(:, matches(1, :));
-x2 = points{2}(:, matches(2, :));
-[F, inliers] = ransac_fundamental_matrix(homog(x1), homog(x2), 2.0);
+x1m = points{1}(:, matches(1, :));
+x2m = points{2}(:, matches(2, :));
+[F, inliers] = ransac_fundamental_matrix(homog(x1m), homog(x2m), 2.0);
 
 % Plot inliers.
 inlier_matches = matches(:, inliers);
 figure;
 plotmatches(I{1}, I{2}, points{1}, points{2}, inlier_matches, 'Stacking', 'v');
 
-x1 = points{1}(:, inlier_matches(1, :));
-x2 = points{2}(:, inlier_matches(2, :));
+x1m = points{1}(:, inlier_matches(1, :));
+x2m = points{2}(:, inlier_matches(2, :));
 
-x1 = homog(x1);
-x2 = homog(x2);
+x1m = homog(x1m);
+x2m = homog(x2m);
 
 % ToDo: compute a projective reconstruction using the factorization method
 
 %% Check projected points (estimated and data points)
-[Pproj, Xproj] = factorization_method(x1,x2, 'sturm');
+[Pproj, Xm] = factorization_method(x1m,x2m, 'sturm');
 for i=1:2
-    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
+    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xm);
 end
-x_d{1} = euclid(x1);
-x_d{2} = euclid(x2);
+x_d{1} = euclid(x1m);
+x_d{2} = euclid(x2m);
 
 % image 1
 figure;
@@ -482,9 +494,14 @@ params.PRINT = 1;
 params.PLOT = 1;
 [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
 
-A = [triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
-    triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [w h])';
-    triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [w h])'];
+img_in =  'Data/0001_s.png'; % input image
+[horizon2, VPs2] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
+%% Now that we have vanishing points, compute Hp
+
+A = [triangulate(VPs(:,1), VPs2(:,1), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(VPs(:,2), VPs2(:,2), Pproj(1:3,:), Pproj(4:6,:), [w h])';
+    triangulate(VPs(:,3), VPs2(:,3), Pproj(1:3,:), Pproj(4:6,:), [w h])'];
 
 p = null(A);
 
@@ -493,7 +510,6 @@ p = p / p(end);
 
 Hp = eye(4,4);
 Hp(end,:) = p';
-
 
 
 %% Visualize the result
@@ -517,6 +533,31 @@ axis equal;
 
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
+
+% We need to compute matrix A from slide 29 (lecture 9)
+omega = inv(K)'*inv(K);
+M = Pproj(1:3,1:3);
+AAt = inv(M'*omega*M);
+A = chol(AAt);
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
+
+%% Visualize the result
+
+% x1m are the data points in image 1
+% Xm are the reconstructed 3D points (projective reconstruction)
+
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = euclid(Ha*Hp*Xm);
+figure; hold on;
+[w,h] = size(I{1});
+for i = 1:length(Xe)
+    scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
+end;
+axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views
