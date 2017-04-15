@@ -259,7 +259,7 @@ v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
 v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
 % add small epsilon to avoid division by zero
-v3(3) = 0.000001;
+%v3(3) = 0.000001;
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
@@ -346,12 +346,17 @@ A_omega =          [v1(1)*v2(1), v1(1)*v2(2) + v1(2)*v2(1), v1(1)*v2(3) + v1(3)*
                     1,           0,                         0,                         -1,          0,                         0];
 
 omega_v = null(A_omega);
+omega_v = omega_v(:,2);
 omega = [omega_v(1) omega_v(2) omega_v(3);
          omega_v(2) omega_v(4) omega_v(5);
          omega_v(3) omega_v(5) omega_v(6)];
      
 % We need to compute matrix A from slide 29 (lecture 9)
-M = Pproj(1:3,1:3);
+
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:,1:3);
+%M = Pproj(1:3,1:3);
+
 AAt = pinv(M'*omega*M);
 A = chol(AAt);
 
